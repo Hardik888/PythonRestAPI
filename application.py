@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,request
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -19,8 +19,30 @@ class Drinks(db.Model):
 @app.route('/')
 def home():
     return "hello flask "
-
+   
 
 @app.route('/drinks')
 def get_drinks():
-    return {"drinks": "drinks data"}
+    drinks =  Drinks.query.all()
+    
+    output = []
+    for drink in drinks:
+        drink_data = {'name': drink.name,'description':drink.
+            description}
+        output.append(drink_data)
+    
+    return {"drinks": output}
+  
+@app.route('/drinks/<id>')
+def get_drink(id):
+    drink = Drinks.query.get_or_404(id)
+    return {"name": drink.name, "description": drink.description}
+
+
+@app.route('/drinks', methods=['POST'])
+def add_drink():
+    drink = Drinks(name=request.json['name'],
+                   description=request.json['description'])
+    db.session.add(drink)
+    db.session.commit()
+    return {'id': drink.id}
